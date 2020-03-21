@@ -2,6 +2,7 @@ from pokemonTypes import bug
 from attack import Attack, MultiAttack
 from statuses import FuryCutterUsed, ConfusionStatus, CantEscape
 from attackKeywords import *
+from random import randint
 
 class FuryCutter(Attack):
 	def __init__(self):
