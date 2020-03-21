@@ -551,8 +551,8 @@ def main():
 					move = player.facing
 					change = True
 
-				elif event.key == K_m:
-					mixer.cycle_origin()
+# 				elif event.key == K_m:
+# 					mixer.cycle_origin()
 
 				elif event.key == K_c:
 					player.cycle_character()
