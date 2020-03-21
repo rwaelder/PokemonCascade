@@ -1,7 +1,7 @@
 import pygame, sys
 sys.path.append('attacks')
 from pygame.locals import *
-from colors import SILVER, BLACK, LIME, YELLOW, RED, BLUE, GRAY, GOLD, SILVER
+from colors import SILVER, BLACK, LIME, YELLOW, RED, BLUE, GRAY, GOLD
 from attack import NoAttack
 from random import choice, randint
 from helpers import *

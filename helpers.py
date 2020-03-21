@@ -30,6 +30,16 @@ def wait_for_click():
 			else:
 				continue
 
+def wait_for_space():
+	while True:
+		for event in pygame.event.get():
+			if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
+				quit()
+			elif event.type == KEYUP and event.key == K_SPACE:
+				return
+			else:
+				continue
+
 def wait_for_sound(mixer):
 	while True:
 		for event in pygame.event.get():
@@ -43,9 +53,9 @@ def wait_for_sound(mixer):
 				continue
 
 def make_text(text, color, bgcolor, left, top, size=20, style='basic'):
-	fontName = 'DejaVuSansMono'
+	# fontName = 'DejaVuSansMono'
 	# fontName = 'ArcadeClassic'
-	# fontName = 'SuperLegendBoy'
+	fontName = 'SuperLegendBoy'
 	# fontName = 'PressStart'
 	if style == 'basic':
 		fontName += '.ttf'

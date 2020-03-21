@@ -1,6 +1,8 @@
 import pygame
-import re
+# import re
 from random import randint
+from colors import RED, YELLOW, GREEN, BLACK
+from helpers import make_text
 
 class Tile():
 	def __init__(self, setParams):
@@ -11,7 +13,6 @@ class Tile():
 		self.isJumpable = False
 		self.jumpDirection = None
 
-		self.item = None
 		self.decoration = None
 
 		self.isEncounterTile = False
@@ -23,9 +24,9 @@ class Tile():
 
 		self.group = None
 
-	# def __init__(self):
-	# 	self.item = None
-	# 	self.decoration = None
+		self.interaction = ''
+
+
 
 	def set_group(self, group):
 		self.group = group
@@ -61,12 +62,14 @@ class Tile():
 		self.isEncounterTile = params['Encounter Tile']
 		self.encounterRate = params['Encounter Rate']
 
+		self.interaction = params['Interaction']
+
 
 	def get_all_params(self):
 		params = {}
 		params.update(self.get_passing_params())
 		params.update(self.get_encounter_params())
-		params.update(self.get_item_params())
+		params.update(self.get_interaction_params())
 		params.update(self.get_decoration_params())
 
 		return params
@@ -85,12 +88,16 @@ class Tile():
 		params = {}
 		params['Encounter Tile'] = self.isEncounterTile
 		params['Encounter Rate'] = self.encounterRate
-		params['Encounters'] = self.encounters
+		# params['Encounters'] = self.encounters
 		return params
 
-	def get_item_params(self):
+	def get_interaction_params(self):
 		params = {}
-		params['Item'] = self.item
+		try:
+			params['Interaction'] = self.interaction
+		except:
+			self.interaction = ''
+			params['Interaction'] = self.interaction
 		return params
 
 	def get_decoration_params(self):
@@ -231,6 +238,12 @@ class MainMap():
 		width = len(squaresArray)
 		height = len(squaresArray[0])
 		self.tiles = []
+
+		startNum = int(input('Interaction start number: '))
+		self.numSigns = startNum
+		self.numDoors = startNum
+		self.numItems = startNum
+
 		for i in range(width):
 			for ii in range(32):
 				column = []
@@ -242,23 +255,60 @@ class MainMap():
 						if tile.baseTile == 'tiles/01_1/6_2.png' and not tile.isEncounterTile:
 							tile.isEncounterTile = True
 							tile.encounterRate = 30
+
+						try:
+							tile.interaction
+						except:
+							tile.interaction = ''
+
+						if tile.interaction:
+							if tile.interaction[0] == 's':
+								tile.interaction = 's_%s' % str(self.numSigns).zfill(3)
+								self.numSigns += 1
+							elif tile.interaction[0] == 'd':
+								tile.interaction = 'd_%s' % str(self.numDoors).zfill(3)
+								self.numDoors += 1
+							elif tile.interaction[0] == 'i':
+								tile.interaction = 'i_%s' % str(self.numItems).zfill(3)
+								self.numItems += 1
+
 						column.append(tile)
 				self.tiles.append(column)
 
 		self.width = len(self.tiles)
 		self.height = len(self.tiles[0])
 
-	def draw_complete(self, tileSize=48):
+	def draw_complete(self, tileSize=48, overlay=False):
 		image = pygame.Surface((tileSize*self.width, tileSize*self.height))
+		interactionLocationDict = {}
 		for i in range(self.width):
 			for j in range(self.height):
-				if self.tiles[i][j] == None:
-					tile = pygame.Surface((tileSize, tileSize))
-					tile.fill((0, 0, 0))
-					image.blit(tile, (i*tileSize, j*tileSize))
+				tile = self.tiles[i][j]
+				if tile == None:
+					tileImage = pygame.Surface((tileSize, tileSize))
+					tileImage.fill((0, 0, 0))
+					image.blit(tileImage, (i*tileSize, j*tileSize))
 				else:
-					tile = self.tiles[i][j].draw(tileSize)
-					image.blit(tile, (i*tileSize, j*tileSize))
+					tileImage = tile.draw(tileSize)
+					image.blit(tileImage, (i*tileSize, j*tileSize))
+
+					if overlay and tile.interaction:
+						if tile.interaction[0] == 's':
+							color = RED
+						elif tile.interaction[0] == 'd':
+							color = GREEN
+						elif tile.interaction[0] == 'i':
+							color = YELLOW
+
+						interactionLocationDict[tile.interaction] = '%s, %s' % (str(tile.group), str(tile.get_location()))
+						pygame.draw.rect(image, color, (i*tileSize, j*tileSize, tileSize, tileSize), 2*tileSize//16)
+						surf, rect = make_text(tile.interaction[2:], BLACK, color, i*tileSize, j*tileSize, size=(5*tileSize//16))
+						image.blit(surf, rect)
+
+		if overlay:
+			with open('interaction_locations.txt', 'w') as f:
+				for key in interactionLocationDict.keys():
+					f.write('%s : %s\n' % (key, interactionLocationDict[key]))
 
 		return image
 
@@ -429,18 +479,22 @@ class MainMap():
 			else:
 				return False
 
-	def interact(self, player):
+	def door_tile(self, player):
 		playerX, playerY = player.get_position()
-		destinationX, destinationY = playerX + player.facing[0], playerY + player.facing[1]
-		interaction = {}
 
-		if self.tiles[destinationX][destinationY].item != None:
-			item = self.tiles[destinationX][destinationY].collect_item()
-			interaction['item'] = item
+		if self.tiles[playerX][playerY].interaction and self.tiles[playerX][playerY].interaction[0] == 'd':
+			return True
+		else:
+			return False
 
-		elif self.tiles[destinationX][destinationY].hasSign:
-			text = self.tiles[destinationX][destinationY].signText
-			interaction['sign'] = text
+	def interact(self, player, door=False):
+		playerX, playerY = player.get_position()
+		if not door:
+			destinationX, destinationY = playerX + player.facing[0], playerY + player.facing[1]
+		else:
+			destinationX, destinationY = playerX, playerY
+
+		interaction = self.tiles[destinationX][destinationY].interaction
 
 		return interaction
 
@@ -451,4 +505,5 @@ class MainMap():
 			return True
 		else:
 			return False
+
 

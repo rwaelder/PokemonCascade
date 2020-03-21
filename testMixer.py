@@ -73,6 +73,11 @@ def main(displaySurface, mixer):
 		surf, rect = make_text('Venusaur', BLACK, GOLD, 224, 538, size=18)
 		displaySurface.blit(surf, rect)
 
+		musicOrigin = pygame.draw.rect(displaySurface, BLACK, (325, 535, 100, 28), 4)
+		text = mixer.musicOrigin
+		surf, rect = make_text(text, BLACK, GOLD, 329, 538, size=18)
+		displaySurface.blit(surf, rect)
+
 		for event in pygame.event.get():
 			if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
 				pygame.quit()
@@ -97,6 +102,8 @@ def main(displaySurface, mixer):
 					mixer.play_attack_sound('Surf')
 				if crySound.collidepoint(mousex, mousey):
 					mixer.play_cry_sound(Pokemon(Venusaur()))
+				if musicOrigin.collidepoint(mousex, mousey):
+					mixer.cycle_origin()
 						
 		pygame.display.update()
 		FPSCLOCK.tick(FPS)

@@ -36,5 +36,8 @@ for file in mapSquares:
 					if oldString in tile.baseTile:
 						newString = 'tiles/0%i_' % i
 						tile.baseTile = tile.baseTile.replace(oldString, newString)
+					if tile.decoration != None and oldString in tile.decoration:
+						newString = 'tiles/0%i_' % i
+						tile.decoration = tile.decoration.replace(oldString, newString)
 
 		save(mapData, file)

@@ -218,6 +218,8 @@ def main():
 	xMin, xMax = 0, 32
 	mouseX = mouseY = 0
 	tileCoords = (36, 0)
+	xStart, xEnd = squareX, squareX+1
+	yStart, yEnd = squareY, squareY+1
 
 	mapSquares = [x[2] for x in os.walk('mapSquares')][0]
 	mapSquares.sort()
@@ -262,8 +264,7 @@ def main():
 	
 	squareParams = mapSquareTiles[squareX][squareY].get_passing_params()
 	squareParams.update(mapSquareTiles[squareX][squareY].get_encounter_params())
-	squareParams.update(mapSquareTiles[squareX][squareY].get_item_params())
-
+	squareParams.update(mapSquareTiles[squareX][squareY].get_interaction_params())
 
 	while True:
 		DISPLAYSURF.fill(BLACK)
@@ -397,6 +398,16 @@ def main():
 									tileParams['Encounter Rate'] = 30
 								else:
 									tileParams['Encounter Rate'] = 0
+
+							elif key == 'Interaction':
+								if tileParams[key] == '':
+									tileParams[key] = 'sign'
+								elif tileParams[key] == 'sign':
+									tileParams[key] = 'door'
+								elif tileParams[key] == 'door':
+									tileParams[key] = 'item'
+								elif tileParams[key] == 'item':
+									tileParams[key] = ''
 
 							else:
 								tileParams[key] = not tileParams[key]

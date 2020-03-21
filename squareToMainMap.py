@@ -1,6 +1,7 @@
 from saveLoad import load_map_square, save_map_square
 from worldBuildingTiles import *
 from os.path import sep
+from sys import argv
 import pygame
 
 pygame.init()
@@ -14,13 +15,13 @@ displaysurface = pygame.display.set_mode((1,1))
 
 # squaresFolder = 'individualSquares' + sep
 
-mapDimensions = (5, 5)
+mapDimensions = (1, 1)
 
 mapData = []
 
-mapName = 'mini_map'
+mapName = argv[1]
 
-squaresFolder = 'mini_map' + sep
+squaresFolder = 'misc_squares/'
 
 print('Compiling...')
 for x in range(mapDimensions[0]+2):
@@ -29,7 +30,7 @@ for x in range(mapDimensions[0]+2):
 		if (x == 0 or y == 0) or (x == mapDimensions[0]+1 or y == mapDimensions[1]+1):
 			mapSquareName = squaresFolder + 'none'
 		else:
-			mapSquareName = squaresFolder + '%i_%i' % (x, y)
+			mapSquareName = squaresFolder + mapName
 
 		try:
 			mapSquare = load_map_square(mapSquareName)
